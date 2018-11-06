@@ -1,0 +1,9 @@
+#!/bin/sh
+#SBATCH --ntasks-per-node=16
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=1
+#SBATCH --time=00:10:00
+#SBATCH --job-name=yrbs_comp
+
+module load R
+Rscript 5_1_comp_yrbs.R
