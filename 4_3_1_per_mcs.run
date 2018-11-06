@@ -1,0 +1,9 @@
+#!/bin/sh
+#SBATCH --ntasks-per-node=16
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=1
+#SBATCH --time=00:400:00
+#SBATCH --job-name=mcs1_permutations
+
+module load R
+Rscript 4_3_1_per_mcs.R

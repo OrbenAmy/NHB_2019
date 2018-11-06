@@ -1,0 +1,10 @@
+#!/bin/sh
+#SBATCH --ntasks-per-node=16
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=1
+#SBATCH --time=00:1500:00
+#SBATCH --job-name=mtf_boot
+#SBATCH --mem=100000
+
+module load R
+Rscript 4_2_1_per_mtf_null.R
