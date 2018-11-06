@@ -8,3 +8,5 @@ The code is split into different subscripts, each split for analyses of the thre
 5. Doing the comparison SCAs
 6. Plotting the SCAs
 7. Plotting the comparison SCAs
+
+You can find .rda files of the SCAs and comparison SCAs on the OSF. Furthermore the bootstrapping test results can also be found on the OSF: https://osf.io/e84xu/
