@@ -1,0 +1,9 @@
+#!/bin/sh
+#SBATCH --ntasks-per-node=1
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=1
+#SBATCH --time=00:300:00
+#SBATCH --job-name=mcs_sca
+
+module load R
+Rscript 2_3_sca_mcs.R
