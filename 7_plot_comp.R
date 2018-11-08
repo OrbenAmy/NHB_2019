@@ -8,6 +8,7 @@ library(tidyverse)
 theme_set(theme_classic())
 library(viridisLite)
 library(gridExtra)
+library(grid)
 
 ##########################################################################################
 # MCS
@@ -38,6 +39,12 @@ medians$percentage <- ((medians$x-medians[13,2])/abs(medians[13,2])*100)
 medians$times <- medians$x/medians[13,2]
 medians
 
+number <- aggregate(results_mcs_ds_comp[, 7:9], list(results_mcs_ds_comp$x_variable), median)
+number$number <- round(number$number, 0)
+number$rsqrd <- round(number$rsqrd, 3)
+number$standard_error <- round(number$standard_error, 3)
+number <- left_join(number, vars, by = "Group.1" )
+number
 #####################################
 # Plot medians
 #####################################
@@ -51,6 +58,7 @@ bar1 <- ggplot(data = median_plot, aes(x = group_factor, y = x, fill = group_fac
   coord_flip() +
   geom_bar(stat="identity") + 
   scale_x_discrete(position = "top") +
+  theme(text = element_text(size=7)) +
   labs(x = "Adolescent Variable", y = "Median Standardised Regression Coefficient")
 bar1
 
@@ -78,11 +86,11 @@ for (i in 1:length(x_variables)){
   
   if (temp_data[1,1] != "tech"){
     if (temp_data[1,1] %in% x_variables[c(3,4,5,6)]){
-      temp_data$level <- "Positive"
+      temp_data$level <- "Panel A: Positive"
     } else if (temp_data[1,1] %in% x_variables[c(1,2,7,12)]){
-      temp_data$level <- "No Effect"
+      temp_data$level <- "Panel B: No Effect"
     } else if (temp_data[1,1] %in% x_variables[c(8,9,10,11)]){
-      temp_data$level <- "Negative"
+      temp_data$level <- "Panel C: Negative"
     } else {
       temp_data$level <- "0"
     }
@@ -90,7 +98,7 @@ for (i in 1:length(x_variables)){
     
   } else {
     for (j in 1:3){
-      names <- c("Positive", "No Effect", "Negative")
+      names <- c("Panel A: Positive", "Panel B: No Effect", "Panel C: Negative")
       temp_data$level <- names[j]
       assign(paste("temp_data_tech_", j, sep = ""), temp_data)
     }
@@ -137,7 +145,22 @@ setwd(".../7_plot_comp")
 scaleFUN <- function(x) sprintf("%.2f", x)
 
 xs <- split(temp_data, f = temp_data$level)
-p1_mcs <- ggplot(data = xs$Negative, aes(x = index, colour = x_variable_f, fill = x_variable_f)) +
+p1_mcs <- ggplot(data = xs$`Panel C: Negative`, aes(x = index, colour = x_variable_f, fill = x_variable_f)) +
+  geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.4,  colour=NA) +
+  geom_line(aes(y=effect), size = 0.2) +
+  scale_colour_manual(values = magma(5, alpha = 1, begin = 0, end = 0.8, direction = -1), guide = FALSE) +
+  scale_fill_manual(values = magma(5, alpha = 0.0000001, begin = 0, end = 0.8, direction = -1)) +
+  theme(legend.title = element_blank(), 
+        legend.text=element_text(size=8), 
+        legend.margin = margin(0,0), 
+        legend.key.size = unit(0.3, "cm"),
+        legend.position = c(0.8, 0.2),
+        strip.background = element_rect(colour="white", fill="white")) +
+  labs(fill="", x = "Specification (Ranked)", y = "Standardised Regression Coefficient") +
+  scale_y_continuous(labels=scaleFUN) +
+  facet_grid(. ~level, scales="free") 
+
+p2_mcs <- ggplot(data = xs$`Panel B: No Effect`, aes(x = index, colour = x_variable_f, fill = x_variable_f)) +
   geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.4,  colour=NA) +
   geom_line(aes(y=effect), size = 0.2) +
   scale_colour_manual(values = magma(5, alpha = 1, begin = 0, end = 0.8, direction = -1), guide = FALSE) +
@@ -156,26 +179,7 @@ p1_mcs <- ggplot(data = xs$Negative, aes(x = index, colour = x_variable_f, fill 
   scale_y_continuous(labels=scaleFUN) +
   facet_grid(. ~level, scales="free") 
 
-p2_mcs <- ggplot(data = xs$`No Effect`, aes(x = index, colour = x_variable_f, fill = x_variable_f)) +
-  geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.4,  colour=NA) +
-  geom_line(aes(y=effect), size = 0.2) +
-  scale_colour_manual(values = magma(5, alpha = 1, begin = 0, end = 0.8, direction = -1), guide = FALSE) +
-  scale_fill_manual(values = magma(5, alpha = 0.0000001, begin = 0, end = 0.8, direction = -1)) +
-  theme(legend.title = element_blank(), 
-        legend.text=element_text(size=8), 
-        legend.margin = margin(0,0), 
-        legend.key.size = unit(0.3, "cm"),
-        legend.position = c(0.8, 0.2),
-        axis.text.x=element_blank(),
-        axis.title.x=element_blank(),
-        axis.ticks.x=element_blank(),
-        axis.line.x=element_blank(),
-        strip.background = element_rect(colour="white", fill="white")) +
-  labs(fill="", x = "Specification", y = "Standardised Regression Coefficient") +
-  scale_y_continuous(labels=scaleFUN) +
-  facet_grid(. ~level, scales="free") 
-
-p3_mcs <- ggplot(data = xs$Positive, aes(x = index, colour = x_variable_f, fill = x_variable_f)) +
+p3_mcs <- ggplot(data = xs$`Panel A: Positive`, aes(x = index, colour = x_variable_f, fill = x_variable_f)) +
   geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.4,  colour=NA) +
   geom_line(aes(y=effect), size = 0.2) +
   scale_colour_manual(values = magma(5, alpha = 1, begin = 0, end = 0.8, direction = -1), guide = FALSE) +
@@ -194,7 +198,7 @@ p3_mcs <- ggplot(data = xs$Positive, aes(x = index, colour = x_variable_f, fill 
   scale_y_continuous(labels=scaleFUN) +
   facet_grid(. ~level, scales="free") 
 grid.arrange(p1_mcs,p2_mcs, p3_mcs, nrow = 3)
-g1 <- arrangeGrob(p1_mcs,p2_mcs,p3_mcs, nrow = 3)
+g1 <- arrangeGrob(p3_mcs,p2_mcs,p1_mcs, nrow = 3)
 
 setwd(".../7_plot_comp")
 ggsave(filename = paste("sfig11.png"),
@@ -209,19 +213,27 @@ p2 <- ggplot(data = xs$`No Effect`, aes(x = index, colour = x_variable_f, fill =
   scale_colour_manual(values = magma(5, alpha = 1, begin = 0, end = 0.8, direction = -1), guide = FALSE) +
   scale_fill_manual(values = magma(5, alpha = 0.0000001, begin = 0, end = 0.8, direction = -1)) +
   theme(legend.title = element_blank(), 
-        legend.text=element_text(size=8), 
+        legend.text=element_text(size=7), 
         legend.margin = margin(0,0), 
-        legend.key.size = unit(0.3, "cm"),
+        legend.key.size = unit(3, "mm"),
         legend.position = c(0.8, 0.2),
+        text = element_text(size=7),
         strip.background = element_rect(colour="white", fill="white"),
         strip.text.x = element_blank()) +
   labs(fill="", x = "Specification", y = "Standardised Regression Coefficient") +
   scale_y_continuous(labels=scaleFUN) +
   facet_grid(. ~level, scales="free") 
 
-fig5 <- grid.arrange(p2, bar1, ncol = 2)
-ggsave(filename = paste("fig5.png"),
-       width = 8, height = 4, fig5)
+bar1_wp <- arrangeGrob(bar1, top = textGrob("B", x = unit(0.2, "npc")
+                                          , y   = unit(0.9, "npc"), just=c("centre","top"),
+                                          gp=gpar(col="black", fontsize=7)))
+p2_wp <- arrangeGrob(p2, top = textGrob("A", x = unit(0.2, "npc")
+                                               , y   = unit(0.9, "npc"), just=c("centre","top"),
+                                               gp=gpar(col="black", fontsize=7)))
+
+fig5 <- grid.arrange(p2_wp, bar1_wp, ncol = 2)
+ggsave(filename = paste("fig5.pdf"),
+       width = 180, height = 90, units = "mm", fig5)
 
 ##########################################################################################
 # YRBS
@@ -254,6 +266,12 @@ medians$percentage <- ((medians$x-medians[13,2])/abs(medians[13,2])*100)
 medians$times <- medians$x/medians[13,2]
 medians
 
+number <- aggregate(results_yrbs_sro_mom[, c(6,8,9)], list(results_yrbs_sro_mom$x_variable), median)
+number$number <- round(number$number, 0)
+number$rsqrd <- round(number$rsqrd, 3)
+number$standard_error <- round(number$standard_error, 3)
+number <- left_join(number, vars, by = "Group.1" )
+number
 
 #####################################
 # Load specification data 
@@ -281,11 +299,11 @@ for (i in 1:length(x_variables)){
   
   if (temp_data[1,1] != "tech"){
     if (temp_data[1,1] %in% x_variables[c(1,2,3,4)]){
-      temp_data$level <- "Positive Factors"
+      temp_data$level <- "Panel A: Positive"
     } else if (temp_data[1,1] %in% x_variables[c(5,6,7,8)]){
-      temp_data$level <- "Neutral Factors"
+      temp_data$level <- "Panel B: No Effect"
     } else if (temp_data[1,1] %in% x_variables[c(9,10,11,12)]){
-      temp_data$level <- "Negative Factors"
+      temp_data$level <- "Panel C: Negative"
     } else {
       temp_data$level <- "0"
     }
@@ -293,7 +311,7 @@ for (i in 1:length(x_variables)){
     
   } else {
     for (j in 1:3){
-      names <- c("Positive Factors", "Neutral Factors", "Negative Factors")
+      names <- c("Panel A: Positive", "Panel B: No Effect", "Panel C: Negative")
       temp_data$level <- names[j]
       assign(paste("temp_data_tech_", j, sep = ""), temp_data)
     }
@@ -337,7 +355,22 @@ temp_plot <- NA
 scaleFUN <- function(x) sprintf("%.2f", x)
 
 xs <- split(temp_data, f = temp_data$level)
-p1_yrbs <- ggplot(data = xs$`Negative Factors`, aes(x = index, colour = x_variable_f, fill = x_variable_f)) +
+p1_yrbs <- ggplot(data = xs$`Panel C: Negative`, aes(x = index, colour = x_variable_f, fill = x_variable_f)) +
+  geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.4,  colour=NA) +
+  geom_line(aes(y=effect), size = 0.2) +
+  scale_colour_manual(values = magma(5, alpha = 1, begin = 0, end = 0.8, direction = -1), guide = FALSE) +
+  scale_fill_manual(values = magma(5, alpha = 0.0000001, begin = 0, end = 0.8, direction = -1)) +
+  theme(legend.title = element_blank(), 
+        legend.text=element_text(size=8), 
+        legend.margin = margin(0,0), 
+        legend.key.size = unit(0.3, "cm"),
+        legend.position = c(0.8, 0.2),
+        strip.background = element_rect(colour="white", fill="white")) +
+  labs(fill="", x = "Specification (Ranked)", y = "Standardised Regression Coefficient") +
+  scale_y_continuous(labels=scaleFUN) +
+  facet_grid(. ~level, scales="free") 
+
+p2_yrbs <- ggplot(data = xs$`Panel B: No Effect`, aes(x = index, colour = x_variable_f, fill = x_variable_f)) +
   geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.4,  colour=NA) +
   geom_line(aes(y=effect), size = 0.2) +
   scale_colour_manual(values = magma(5, alpha = 1, begin = 0, end = 0.8, direction = -1), guide = FALSE) +
@@ -356,26 +389,7 @@ p1_yrbs <- ggplot(data = xs$`Negative Factors`, aes(x = index, colour = x_variab
   scale_y_continuous(labels=scaleFUN) +
   facet_grid(. ~level, scales="free") 
 
-p2_yrbs <- ggplot(data = xs$`Neutral Factors`, aes(x = index, colour = x_variable_f, fill = x_variable_f)) +
-  geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.4,  colour=NA) +
-  geom_line(aes(y=effect), size = 0.2) +
-  scale_colour_manual(values = magma(5, alpha = 1, begin = 0, end = 0.8, direction = -1), guide = FALSE) +
-  scale_fill_manual(values = magma(5, alpha = 0.0000001, begin = 0, end = 0.8, direction = -1)) +
-  theme(legend.title = element_blank(), 
-        legend.text=element_text(size=8), 
-        legend.margin = margin(0,0), 
-        legend.key.size = unit(0.3, "cm"),
-        legend.position = c(0.8, 0.1),
-        axis.text.x=element_blank(),
-        axis.title.x=element_blank(),
-        axis.ticks.x=element_blank(),
-        axis.line.x=element_blank(),
-        strip.background = element_rect(colour="white", fill="white")) +
-  labs(fill="", x = "Specification", y = "Standardised Regression Coefficient") +
-  scale_y_continuous(labels=scaleFUN) +
-  facet_grid(. ~level, scales="free") 
-
-p3_yrbs <- ggplot(data = xs$`Positive Factors`, aes(x = index, colour = x_variable_f, fill = x_variable_f)) +
+p3_yrbs <- ggplot(data = xs$`Panel A: Positive`, aes(x = index, colour = x_variable_f, fill = x_variable_f)) +
   geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.4,  colour=NA) +
   geom_line(aes(y=effect), size = 0.2) +
   scale_colour_manual(values = magma(5, alpha = 1, begin = 0, end = 0.8, direction = -1), guide = FALSE) +
@@ -393,8 +407,8 @@ p3_yrbs <- ggplot(data = xs$`Positive Factors`, aes(x = index, colour = x_variab
   labs(fill="", x = "Specification", y = "Standardised Regression Coefficient") +
   scale_y_continuous(labels=scaleFUN) +
   facet_grid(. ~level, scales="free")
-grid.arrange(p1_yrbs,p2_yrbs,p3_yrbs, nrow = 3)
-g2 <- arrangeGrob(p1_yrbs,p2_yrbs,p3_yrbs, nrow = 3)
+grid.arrange(p3_yrbs,p2_yrbs,p1_yrbs, nrow = 3)
+g2 <- arrangeGrob(p3_yrbs,p2_yrbs,p1_yrbs, nrow = 3)
 
 setwd(".../7_plot_comp")
 ggsave(filename = paste("sfig9.png"),
@@ -412,18 +426,25 @@ x_variables <- c("v8526", "v8530", "v7251", "v8527",
                  "v7109", "v7101", "v7113", "v8516", "tech") 
 x_names <- c("breakfast", "sleep", "eat fruit", "eat vegetables",
              "listen music", "religious service",  "go to movies", "homework time",
-             "# drink alc", "Cigarettes", "# marijuana", "fight", "technology")
-
+             "drink alc", "Cigarettes", "marijuana", "fight", "technology")
+vars <- as.data.frame(cbind(x_variables, x_names))
+names(vars) <- c("Group.1", "Names")
 #####################################
 # Medians
 #####################################
 load("5_2_comp_mtf_results.rda")
 medians <- aggregate(results_mtf_ds_comp[, 4], list(results_mtf_ds_comp$x_variable), median)
-medians$Group.1 <- c("tech", "cigarettes", "alcohol", "weed", "religion", "fruit", "movies","homework",
-                     "music", "fight", "breakfast", "veggie", "sleep")
+medians <- left_join(medians, vars, by = "Group.1" )
 medians$percentage <- ((medians$x-medians[1,2])/abs(medians[1,2])*100)
 medians$times <- medians$x/medians[1,2]
 medians
+
+number <- aggregate(results_mtf_ds_comp[, c(7:9)], list(results_mtf_ds_comp$x_variable), median)
+number$number <- round(number$number, 0)
+number$rsqrd <- round(number$rsqrd, 3)
+number$standard_error <- round(number$standard_error, 3)
+number <- left_join(number, vars, by = "Group.1" )
+number
 
 #####################################
 # Load specification data 
@@ -452,11 +473,11 @@ for (i in 1:length(x_variables)){
   
   if (temp_data[1,1] != "tech"){
     if (temp_data[1,1] %in% x_variables[c(1,2,3,4)]){
-      temp_data$level <- "Positive"
+      temp_data$level <- "Panel A: Positive"
     } else if (temp_data[1,1] %in% x_variables[c(5,6,7,8)]){
-      temp_data$level <- "No Effect"
+      temp_data$level <- "Panel B: No Effect"
     } else if (temp_data[1,1] %in% x_variables[c(9,10,11,12)]){
-      temp_data$level <- "Negative"
+      temp_data$level <- "Panel C: Negative"
     } else {
       temp_data$level <- "0"
     }
@@ -464,7 +485,7 @@ for (i in 1:length(x_variables)){
     
   } else {
     for (j in 1:3){
-      names <- c("Positive", "No Effect", "Negative")
+      names <- c("Panel A: Positive", "Panel B: No Effect", "Panel C: Negative")
       temp_data$level <- names[j]
       assign(paste("temp_data_tech_", j, sep = ""), temp_data)
     }
@@ -507,7 +528,22 @@ temp_plot <- NA
 scaleFUN <- function(x) sprintf("%.2f", x)
 
 xs <- split(temp_data, f = temp_data$level)
-p1_mtf <- ggplot(data = xs$Negative, aes(x = index, colour = x_variable_f, fill = x_variable_f)) +
+p1_mtf <- ggplot(data = xs$`Panel C: Negative`, aes(x = index, colour = x_variable_f, fill = x_variable_f)) +
+  geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.4,  colour=NA) +
+  geom_line(aes(y=effect), size = 0.2) +
+  scale_colour_manual(values = magma(5, alpha = 1, begin = 0, end = 0.8, direction = -1), guide = FALSE) +
+  scale_fill_manual(values = magma(5, alpha = 0.0000001, begin = 0, end = 0.8, direction = -1)) +
+  theme(legend.title = element_blank(), 
+        legend.text=element_text(size=8), 
+        legend.margin = margin(0,0), 
+        legend.key.size = unit(0.3, "cm"),
+        legend.position = c(0.8, 0.2),
+        strip.background = element_rect(colour="white", fill="white")) +
+  labs(fill="", x = "Specification (Ranked)", y = "Standardised Regression Coefficient") +
+  scale_y_continuous(labels=scaleFUN) +
+  facet_grid(. ~level, scales="free") 
+
+p2_mtf <- ggplot(data = xs$`Panel B: No Effect`, aes(x = index, colour = x_variable_f, fill = x_variable_f)) +
   geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.4,  colour=NA) +
   geom_line(aes(y=effect), size = 0.2) +
   scale_colour_manual(values = magma(5, alpha = 1, begin = 0, end = 0.8, direction = -1), guide = FALSE) +
@@ -526,26 +562,7 @@ p1_mtf <- ggplot(data = xs$Negative, aes(x = index, colour = x_variable_f, fill 
   scale_y_continuous(labels=scaleFUN) +
   facet_grid(. ~level, scales="free") 
 
-p2_mtf <- ggplot(data = xs$`No Effect`, aes(x = index, colour = x_variable_f, fill = x_variable_f)) +
-  geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.4,  colour=NA) +
-  geom_line(aes(y=effect), size = 0.2) +
-  scale_colour_manual(values = magma(5, alpha = 1, begin = 0, end = 0.8, direction = -1), guide = FALSE) +
-  scale_fill_manual(values = magma(5, alpha = 0.0000001, begin = 0, end = 0.8, direction = -1)) +
-  theme(legend.title = element_blank(), 
-        legend.text=element_text(size=8), 
-        legend.margin = margin(0,0), 
-        legend.key.size = unit(0.3, "cm"),
-        legend.position = c(0.8, 0.1),
-        axis.text.x=element_blank(),
-        axis.title.x=element_blank(),
-        axis.ticks.x=element_blank(),
-        axis.line.x=element_blank(),
-        strip.background = element_rect(colour="white", fill="white")) +
-  labs(fill="", x = "Specification", y = "Standardised Regression Coefficient") +
-  scale_y_continuous(labels=scaleFUN) +
-  facet_grid(. ~level, scales="free") 
-
-p3_mtf <- ggplot(data = xs$Positive, aes(x = index, colour = x_variable_f, fill = x_variable_f)) +
+p3_mtf <- ggplot(data = xs$`Panel A: Positive`, aes(x = index, colour = x_variable_f, fill = x_variable_f)) +
   geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.4,  colour=NA) +
   geom_line(aes(y=effect), size = 0.2) +
   scale_colour_manual(values = magma(5, alpha = 1, begin = 0, end = 0.8, direction = -1), guide = FALSE) +
@@ -564,8 +581,8 @@ p3_mtf <- ggplot(data = xs$Positive, aes(x = index, colour = x_variable_f, fill 
   scale_y_continuous(labels=scaleFUN) +
   facet_grid(. ~level, scales="free") 
 
-grid.arrange(p1_mtf,p2_mtf,p3_mtf, nrow = 3)
-g3 <- arrangeGrob(p1_mtf,p2_mtf,p3_mtf, nrow = 3)
+grid.arrange(p3_mtf,p2_mtf,p1_mtf, nrow = 3)
+g3 <- arrangeGrob(p3_mtf,p2_mtf,p1_mtf, nrow = 3)
 
 setwd(".../7_plot_comp")
 ggsave(filename = paste("sfig10.png"),
@@ -575,10 +592,10 @@ ggsave(filename = paste("sfig10.png"),
 # Merge and make general graph 
 ##########################################################################################
 setwd(".../7_plot_comp")
-t1 <- grid.arrange(p1_yrbs,p2_yrbs,p3_yrbs, ncol=3)
-t2 <- grid.arrange(p1_mtf,p2_mtf,p3_mtf, ncol=3)
-t3 <- grid.arrange(p1_mcs,p2_mcs,p3_mcs, ncol=3)
-gc <- arrangeGrob(t1,t2,t3,ncol=1)
+t1 <- grid.arrange(p3_yrbs,p2_yrbs,p1_yrbs, ncol=1)
+t2 <- grid.arrange(p3_mtf,p2_mtf,p1_mtf, ncol=1)
+t3 <- grid.arrange(p3_mcs,p2_mcs,p1_mcs, ncol=1)
+gc <- arrangeGrob(t1,t2,t3,ncol=3)
 ggsave(filename = paste("plot_comp.png", sep = ""),
        width = 12, height = 12, gc)
 
