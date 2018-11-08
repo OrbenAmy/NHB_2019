@@ -4,6 +4,7 @@
 ##########################################################################################
 library(tidyr)
 library(dplyr)
+library(heplots)
 
 vars <- Sys.getenv(c("HOME","SLURM_ARRAY_JOB_ID","SLURM_ARRAY_TASK_ID"))
 data <- read.csv(file=paste0(vars["HOME"],"/1_2_prep_mtf_data.csv"), header=TRUE, sep = ",")
@@ -23,8 +24,8 @@ resultsframe <- function(x_var, y_var) {
   # Calculate Number of Combinations/Analyses to run
   combinations <- length(levels_x) * length(levels_y) * length(levels_c)
   # Setup results frame
-  results_frame <- data.frame(matrix(NA, nrow=combinations, ncol=7))
-  colnames(results_frame) <- c("x_variable", "y_variable", "controls", "effect", "t_value", "p_value", "standard_error")
+  results_frame <- data.frame(matrix(NA, nrow=combinations, ncol=9))
+  colnames(results_frame) <- c("x_variable", "y_variable", "controls", "effect", "t_value", "p_value", "standard_error", "number", "rsqrd")
   # Write combinations into results frame
   results_frame$x_variable <- rep(levels_x, each=nrow(results_frame)/length(levels_x))
   results_frame$y_variable <- rep(rep(levels_y, each=nrow(results_frame)/(length(levels_x)*length(levels_y))), times=length(levels_x))
@@ -81,6 +82,8 @@ comp_curve <- function(input) {
       summary(reg)$coef[[2, 2]] %>% {
         ifelse(. == 0, NA, .)
       }
+    results_frame$number[n] <- nobs(reg)
+    results_frame$rsqrd[n] <- etasq(reg)["scale(iv)", "Partial eta^2"] 
     print(n)
   }
   return(results_frame)

@@ -4,6 +4,7 @@
 ##########################################################################################
 library(tidyr)
 library(dplyr)
+library(heplots)
 
 vars <- Sys.getenv(c("HOME"))
 data <- read.csv(file=paste0(vars["HOME"],"/1_1_prep_yrbs_data.csv"), header=TRUE, sep = ",")
