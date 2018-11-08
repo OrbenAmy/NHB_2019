@@ -51,7 +51,8 @@ plot1 <- ggplot(temp_data, aes(x = 1:nrow(temp_data))) +
     axis.text.x = element_blank(),
     axis.title.x = element_blank(),
     axis.ticks.x = element_blank(),
-    axis.line.x = element_blank()
+    axis.line.x = element_blank(),
+    text = element_text(size=7)
   )
 
 print(plot1)
@@ -64,13 +65,9 @@ plot_number <- ggplot(temp_data, aes(x = 1:nrow(temp_data))) +
   geom_point(aes(y = number, color = sig), size = 0.1) +
   scale_color_manual(values = c("#FF0000", "#000000")) +
   ggtitle("SCA: YRBS") +
-  scale_y_continuous(name = "Number of Observations") +
+  labs(x = "Specification (Ranked)", y = "Number of Observations") +
   theme(
-    legend.position = "none",
-    axis.text.x = element_blank(),
-    axis.title.x = element_blank(),
-    axis.ticks.x = element_blank(),
-    axis.line.x = element_blank()
+    legend.position = "none"
   )
 setwd(".../6_plot_sca")
 ggsave(file="sfig1.jpg", plot_number, width = 6, height = 2)
@@ -188,7 +185,8 @@ plot.multiverse.vars <-
     legend.position = "none",
     strip.text.x = element_blank(),
     strip.text.y = element_blank(),
-    strip.background = element_blank()
+    strip.background = element_blank(),
+    text = element_text(size=7)
   )
 
 print(plot.multiverse.vars)
@@ -211,4 +209,5 @@ for (i in 1:length(grobs)){
 g <- do.call("grid.arrange", c(grobs, ncol = 1))
 
 ### Save
-ggsave(file="fig1.jpg", g, width = 10, height = 8)
+ggsave(file="fig1.pdf", g,
+       width = 180, height = 144, units = "mm")

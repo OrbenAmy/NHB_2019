@@ -43,7 +43,7 @@ temp_data$lower <- temp_data$effect - temp_data$standard_error
 h <- round(median(temp_data$effect), digits = 3)
 plot1 <- ggplot(temp_data, aes(x = 1:nrow(temp_data))) +
   geom_ribbon(aes(ymin = lower, ymax = upper), fill = "grey90") +
-  geom_point(aes(y = effect, color = sig), size = 0.1) +
+  geom_point(aes(y = effect, color = sig), size = 0.01) +
   geom_hline(yintercept = h, linetype = "dashed") +
   geom_hline(yintercept = 0) +
   scale_color_manual(values = c("#FF0000", "#000000")) +
@@ -54,7 +54,8 @@ plot1 <- ggplot(temp_data, aes(x = 1:nrow(temp_data))) +
     axis.text.x = element_blank(),
     axis.title.x = element_blank(),
     axis.ticks.x = element_blank(),
-    axis.line.x = element_blank()
+    axis.line.x = element_blank(),
+    text = element_text(size=7)
   )
 print(plot1)
 setwd(".../6_plot_sca")
@@ -66,13 +67,9 @@ plot_number <- ggplot(temp_data, aes(x = 1:nrow(temp_data))) +
   geom_point(aes(y = number, color = sig), size = 0.1) +
   scale_color_manual(values = c("#FF0000", "#000000")) +
   ggtitle("SCA: MCS") +
-  scale_y_continuous(name = "Number of Observations") +
+  labs(x = "Specification (Ranked)", y = "Number of Observations") +
   theme(
-    legend.position = "none",
-    axis.text.x = element_blank(),
-    axis.title.x = element_blank(),
-    axis.ticks.x = element_blank(),
-    axis.line.x = element_blank()
+    legend.position = "none"
   )
 setwd(".../6_plot_sca")
 ggsave(file="sfig3.jpg", plot_number, width = 6, height = 2)
@@ -280,7 +277,7 @@ dot_data_long <-
 
 plot.multiverse.vars <-
   ggplot(data = dot_data_long, aes(x = vars_or, y = vars_score, color = sig)) +
-  geom_jitter(shape = ".", alpha = 0.5) +
+  geom_jitter(shape = ".", alpha = 0.5, size = 0.01) +
   scale_color_manual(values = c("#FF0000", "#000000")) +
   coord_flip() +
   facet_grid(grouping_or ~ ., scales = "free", space = "free") +
@@ -289,7 +286,8 @@ plot.multiverse.vars <-
     legend.position = "none",
     strip.text.x = element_blank(),
     strip.text.y = element_blank(),
-    strip.background = element_blank()
+    strip.background = element_blank(),
+    text = element_text(size=7)
   )
 print(plot.multiverse.vars)
 
@@ -310,7 +308,8 @@ for (i in 1:length(grobs)){
 g <- do.call("grid.arrange", c(grobs, ncol = 1))
 
 ### Save
-ggsave(file="fig3.jpg", g, width = 10, height = 8)
+ggsave(file="fig3.pdf", g,
+       width = 180, height = 144, units = "mm")
 
 #####################################
 # Plot control/no control separately
@@ -395,15 +394,14 @@ plot1 <- ggplot() +
     x = 10500,
     y = c(-0.078,-0.014),
     label = c("No Controls = -0.068", "Controls = -0.005"),
-    size = 3,
     colour = c(colours[7], colours[4]),
-    hjust = 1
+    hjust = 1,
+    size = 2
   ) +
+  theme(text = element_text(size=7)) +
   scale_color_identity()
 print(plot1)
 
 ggsave(
-  filename = "fig4.png",
-  width = 5,
-  height = 5
-)
+  filename = "fig4.pdf",
+  width = 88, height = 88, units = "mm")

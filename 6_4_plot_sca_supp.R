@@ -271,10 +271,10 @@ temp_data$lower <- temp_data$effect - temp_data$standard_error
 x_variables <- list("v7326", "v7325", "v7381", "v7552")
 x_names <-
   c(
-    "TV Viewing on Weekday",
-    "TV Viewing on Weekend",
-    "Using Internet to get News",
-    "Social Media Use"
+    "Panel A: TV Viewing on Weekday",
+    "Panel B: TV Viewing on Weekend",
+    "Panel C: Using Internet to get News",
+    "Panel D: Social Media Use"
   )
 
 for (m in 1:4) {
@@ -320,12 +320,9 @@ for (m in 1:4) {
     scale_size_manual(values = c(0.1, 2)) +
     ggtitle(x_names[m]) +
     scale_y_continuous(name = "Regression Coefficient") +
+    scale_x_continuous(name = "Specification (Ranked)") +
     theme(
-      legend.position = "none",
-      axis.text.x = element_blank(),
-      axis.title.x = element_blank(),
-      axis.ticks.x = element_blank(),
-      axis.line.x = element_blank()
+      legend.position = "none"
     )
   
   print(plot1)
@@ -340,7 +337,7 @@ gc <- arrangeGrob(plot_1, plot_2, plot_3, plot_4, ncol = 2)
 ggsave(
   filename = paste("sfig5.jpg", sep = ""),
   width = 9,
-  height = 4,
+  height = 7,
   gc
 )
 
