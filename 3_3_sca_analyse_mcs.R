@@ -24,21 +24,57 @@ save(results_mcs_sca_total, file = "2_3_sca_mcs_results.rda")
 ####################################################################################
 nrow(results_mcs_sca_total)
 
+## Amount of results and significant results with dominant sign
+results_mcs_sca_total_sig <- results_mcs_sca_total %>% filter(p_value < 0.05)
+pmax(table(sign(results_mcs_sca_total$effect))[[-1]],table(sign(results_mcs_sca_total$effect))[[1]])
+pmax(table(sign(results_mcs_sca_total_sig$effect))[[-1]],table(sign(results_mcs_sca_total_sig$effect))[[1]])
+
+
 ####################################################################################
 # Median effects
 # total, separate x variables, controls/no controls
 ####################################################################################
-results_mcs_sca_total %>% summarise(median_effect = median(effect, na.rm = TRUE), median_effectsize = median(rsqrd, na.rm = TRUE))
+results_mcs_sca_total %>% summarise(median_effect = median(effect, na.rm = TRUE), 
+                                    median_effectsize = median(rsqrd, na.rm = TRUE), 
+                                    median_n = median(number, na.rm = TRUE),
+                                    median_se = median(standard_error, na.rm = TRUE))
 
-results_mcs_sca_total %>% filter(respondent == "Parent") %>% summarise(median_effect = median(effect, na.rm = TRUE), median_effectsize = median(rsqrd, na.rm = TRUE))
-results_mcs_sca_total %>% filter(respondent == "Cohort Member") %>% summarise(median_effect = median(effect, na.rm = TRUE), median_effectsize = median(rsqrd, na.rm = TRUE))
+results_mcs_sca_total %>% filter(respondent == "Parent") %>% summarise(median_effect = median(effect, na.rm = TRUE), 
+                                                                       median_effectsize = median(rsqrd, na.rm = TRUE), 
+                                                                       median_n = median(number, na.rm = TRUE),
+                                                                       median_se = median(standard_error, na.rm = TRUE))
+results_mcs_sca_total %>% filter(respondent == "Cohort Member") %>% summarise(median_effect = median(effect, na.rm = TRUE),
+                                                                              median_effectsize = median(rsqrd, na.rm = TRUE), 
+                                                                              median_n = median(number, na.rm = TRUE),
+                                                                              median_se = median(standard_error, na.rm = TRUE))
 
-results_mcs_sca_total %>% filter(controls == "Controls") %>% summarise(median_effect = median(effect, na.rm = TRUE), median_effectsize = median(rsqrd, na.rm = TRUE))
-results_mcs_sca_total %>% filter(controls == "No Controls") %>% summarise(median_effect = median(effect, na.rm = TRUE), median_effectsize = median(rsqrd, na.rm = TRUE))
+results_mcs_sca_total %>% filter(controls == "Controls") %>% summarise(median_effect = median(effect, na.rm = TRUE), 
+                                                                       median_effectsize = median(rsqrd, na.rm = TRUE), 
+                                                                       median_n = median(number, na.rm = TRUE),
+                                                                       median_se = median(standard_error, na.rm = TRUE))
+results_mcs_sca_total %>% filter(controls == "No Controls") %>% summarise(median_effect = median(effect, na.rm = TRUE), 
+                                                                          median_effectsize = median(rsqrd, na.rm = TRUE), 
+                                                                          median_n = median(number, na.rm = TRUE),
+                                                                          median_se = median(standard_error, na.rm = TRUE))
 
-results_mcs_sca_total %>% filter(x_variable == "fctvho00r") %>% summarise(median_effect = median(effect, na.rm = TRUE), median_effectsize = median(rsqrd, na.rm = TRUE))
-results_mcs_sca_total %>% filter(x_variable == "fccomh00r") %>% summarise(median_effect = median(effect, na.rm = TRUE), median_effectsize = median(rsqrd, na.rm = TRUE))
-results_mcs_sca_total %>% filter(x_variable == "fccmex00r") %>% summarise(median_effect = median(effect, na.rm = TRUE), median_effectsize = median(rsqrd, na.rm = TRUE))
-results_mcs_sca_total %>% filter(x_variable == "fcinth00r") %>% summarise(median_effect = median(effect, na.rm = TRUE), median_effectsize = median(rsqrd, na.rm = TRUE))
-results_mcs_sca_total %>% filter(x_variable == "fcsome00r") %>% summarise(median_effect = median(effect, na.rm = TRUE), median_effectsize = median(rsqrd, na.rm = TRUE))
+results_mcs_sca_total %>% filter(x_variable == "fctvho00r") %>% summarise(median_effect = median(effect, na.rm = TRUE), 
+                                                                          median_effectsize = median(rsqrd, na.rm = TRUE), 
+                                                                          median_n = median(number, na.rm = TRUE),
+                                                                          median_se = median(standard_error, na.rm = TRUE))
+results_mcs_sca_total %>% filter(x_variable == "fccomh00r") %>% summarise(median_effect = median(effect, na.rm = TRUE), 
+                                                                          median_effectsize = median(rsqrd, na.rm = TRUE), 
+                                                                          median_n = median(number, na.rm = TRUE),
+                                                                          median_se = median(standard_error, na.rm = TRUE))
+results_mcs_sca_total %>% filter(x_variable == "fccmex00r") %>% summarise(median_effect = median(effect, na.rm = TRUE), 
+                                                                          median_effectsize = median(rsqrd, na.rm = TRUE), 
+                                                                          median_n = median(number, na.rm = TRUE),
+                                                                          median_se = median(standard_error, na.rm = TRUE))
+results_mcs_sca_total %>% filter(x_variable == "fcinth00r") %>% summarise(median_effect = median(effect, na.rm = TRUE), 
+                                                                          median_effectsize = median(rsqrd, na.rm = TRUE), 
+                                                                          median_n = median(number, na.rm = TRUE),
+                                                                          median_se = median(standard_error, na.rm = TRUE))
+results_mcs_sca_total %>% filter(x_variable == "fcsome00r") %>% summarise(median_effect = median(effect, na.rm = TRUE), 
+                                                                          median_effectsize = median(rsqrd, na.rm = TRUE), 
+                                                                          median_n = median(number, na.rm = TRUE),
+                                                                          median_se = median(standard_error, na.rm = TRUE))
 
