@@ -81,7 +81,7 @@ curve <- function(input) {
     } else {
       d1 <-
         apply((subset(data_short, select = results_frame$y_variable[[n]])), 1, sum)
-      data_short$dv <- ifelse(d1 == 0, 0, ifelse(is.na(d1), NA, 1))
+      data_short$dv <- ifelse(d1 < length(results_frame$y_variable[[n]]), 0, ifelse(is.na(d1), NA, 1))
     }
     
     # Select technology
